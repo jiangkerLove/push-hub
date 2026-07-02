@@ -1,0 +1,145 @@
+name: Android AAR
+
+on:
+  push:
+    tags:
+      - "android-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "版本号，例如 0.1.0（不填则用 android/VERSION）"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: android/**/*.gradle*
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" == android-v* ]]; then
+            VERSION="${GITHUB_REF_NAME#android-v}"
+          elif [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="$(tr -d '[:space:]' < android/VERSION)"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Using version: ${VERSION}"
+
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" == android-v* ]]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=android-v${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Grant Gradle permission
+        working-directory: android
+        run: chmod +x gradlew
+
+      - name: Assemble release AARs
+        working-directory: android
+        run: ./gradlew --no-daemon assemblePushHubAars "-PpushHubVersion=${{ steps.version.outputs.version }}"
+
+      - name: Collect AAR release assets
+        id: assets
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          OUT="${GITHUB_WORKSPACE}/dist/android-aar-${VERSION}"
+          mkdir -p "$OUT"
+          for module in push-core push push-xiaomi push-huawei push-oppo push-vivo push-honor push-meizu; do
+            src=$(find "android/${module}/build/outputs/aar" -name '*-release.aar' | head -n 1 || true)
+            if [[ -n "$src" ]]; then
+              cp "$src" "$OUT/${module}-${VERSION}.aar"
+            else
+              echo "Missing AAR for $module" >&2
+              exit 1
+            fi
+          done
+          cat > "$OUT/README.txt" <<EOF
+          Push Hub Android SDK ${VERSION}
+
+          按需下载附件中的 AAR（厂商模块已内嵌对应官方 SDK）：
+            必选：push-core-${VERSION}.aar、push-${VERSION}.aar
+            按需：push-xiaomi / push-huawei / push-oppo / push-vivo / push-honor / push-meizu
+
+          放入业务工程 libs/ 后引入，例如：
+            implementation(files("libs/push-core-${VERSION}.aar"))
+            implementation(files("libs/push-${VERSION}.aar"))
+            implementation(files("libs/push-xiaomi-${VERSION}.aar"))
+
+          详见 docs/android-integration.md
+          EOF
+          echo "dir=dist/android-aar-${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Release assets:"
+          ls -la "$OUT"
+          # fat-aar 未合并厂商 SDK 时 release AAR 通常 < 50KB
+          for module in push-xiaomi push-oppo push-vivo push-honor push-meizu; do
+            file="$OUT/${module}-${VERSION}.aar"
+            size=$(stat -c%s "$file")
+            echo "${module}-${VERSION}.aar size=${size}"
+            if [[ "$size" -lt 51200 ]]; then
+              echo "ERROR: ${module} AAR too small (${size} bytes); vendor SDK likely not embedded" >&2
+              exit 1
+            fi
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: Android SDK ${{ steps.version.outputs.version }}
+          fail_on_unmatched_files: true
+          body: |
+            ## Push Hub Android SDK `${{ steps.version.outputs.version }}`
+
+            附件为**各模块独立 AAR**，按需下载即可（厂商模块已内嵌官方 SDK）。
+
+            | 附件 | 说明 |
+            |------|------|
+            | `push-core-${{ steps.version.outputs.version }}.aar` | 核心（必选） |
+            | `push-${{ steps.version.outputs.version }}.aar` | 统一入口（必选） |
+            | `push-xiaomi-${{ steps.version.outputs.version }}.aar` | 小米（按需） |
+            | `push-huawei-${{ steps.version.outputs.version }}.aar` | 华为（按需） |
+            | `push-oppo-${{ steps.version.outputs.version }}.aar` | OPPO（按需） |
+            | `push-vivo-${{ steps.version.outputs.version }}.aar` | vivo（按需） |
+            | `push-honor-${{ steps.version.outputs.version }}.aar` | 荣耀（按需） |
+            | `push-meizu-${{ steps.version.outputs.version }}.aar` | 魅族（按需） |
+
+            ```kotlin
+            implementation(files("libs/push-core-${{ steps.version.outputs.version }}.aar"))
+            implementation(files("libs/push-${{ steps.version.outputs.version }}.aar"))
+            implementation(files("libs/push-xiaomi-${{ steps.version.outputs.version }}.aar")) // 按需
+            ```
+
+            详见 [Android 集成指南](https://github.com/${{ github.repository }}/blob/main/docs/android-integration.md)。
+          files: |
+            dist/android-aar-${{ steps.version.outputs.version }}/*.aar
+            dist/android-aar-${{ steps.version.outputs.version }}/README.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,2 @@
+-keep class com.huawei.hms.** { *; }
+-keep class com.jiangker.push.huawei.** { *; }

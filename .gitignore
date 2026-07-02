@@ -1,0 +1,51 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# Environment & local data
+.env
+.env.*
+!.env.example
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# Admin
+admin/node_modules/
+admin/dist/
+
+# Android local secrets
+android/sample/push.properties
+android/sample/agconnect-services.json
+android/**/*.jks
+android/**/*.keystore
+
+# Rust
+server/target/
+**/*.rs.bk
+
+# Local-only WebSocket load tester (not shipped)
+loadtest/
+
+# Android (multi-module)
+android/.gradle/
+android/local.properties
+android/**/build/
+android/.cxx/
+android/**/.externalNativeBuild/
+android/captures/
+android/**/*.apk
+android/**/*.aab
+android/**/*.ap_
+android/**/*.dex
+*.aar

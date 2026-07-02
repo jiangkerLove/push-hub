@@ -1,0 +1,4 @@
+-keep class com.jiangker.push.vivo.VivoPushProvider { <init>(); }
+-dontwarn com.vivo.push.**
+-keep class com.vivo.push.** { *; }
+-keep class com.vivo.vms.** { *; }

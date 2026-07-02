@@ -1,0 +1,14 @@
+-keep class com.jiangker.push.xiaomi.XiaomiPushProvider { <init>(); }
+-keep class com.jiangker.push.xiaomi.XiaomiPushReceiver { *; }
+-keep class com.xiaomi.** { *; }
+-dontwarn com.xiaomi.push.**
+-keep class com.xiaomi.mipush.sdk.MiPushMessage { *; }
+-keep class com.xiaomi.mipush.sdk.MiPushCommandMessage { *; }
+-keep class com.xiaomi.mipush.sdk.PushMessageReceiver { *; }
+-keep class com.xiaomi.mipush.sdk.MessageHandleService { *; }
+-keep class com.xiaomi.push.service.XMJobService { *; }
+-keep class com.xiaomi.push.service.XMPushService { *; }
+-keep class com.xiaomi.mipush.sdk.PushMessageHandler { *; }
+-keep class com.xiaomi.push.service.receivers.NetworkStatusReceiver { *; }
+-keep class com.xiaomi.push.service.receivers.PingReceiver { *; }
+-keep class com.xiaomi.mipush.sdk.NotificationClickedActivity { *; }

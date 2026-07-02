@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.coloros.mcs.permission.RECEIVE_MCS_MESSAGE" />
+    <uses-permission android:name="com.heytap.mcs.permission.RECEIVE_MCS_MESSAGE" />
+
+    <application>
+        <meta-data
+            android:name="com.jiangker.push.oppo.app_key"
+            android:value="${OPPO_APP_KEY}" />
+        <meta-data
+            android:name="com.jiangker.push.oppo.app_secret"
+            android:value="${OPPO_APP_SECRET}" />
+
+        <service
+            android:name="com.jiangker.push.oppo.OppoDataMessageService"
+            android:exported="true"
+            android:permission="com.coloros.mcs.permission.SEND_MCS_MESSAGE">
+            <intent-filter>
+                <action android:name="com.coloros.mcs.action.RECEIVE_MCS_MESSAGE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="com.jiangker.push.oppo.OppoDataMessageServiceV2"
+            android:exported="true"
+            android:permission="com.heytap.mcs.permission.SEND_PUSH_MESSAGE">
+            <intent-filter>
+                <action android:name="com.heytap.mcs.action.RECEIVE_MCS_MESSAGE" />
+                <action android:name="com.heytap.msp.push.RECEIVE_MCS_MESSAGE" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

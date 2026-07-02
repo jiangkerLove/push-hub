@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <permission
+        android:name="${applicationId}.permission.MIPUSH_RECEIVE"
+        android:protectionLevel="signature"
+        tools:node="merge" />
+
+    <uses-permission android:name="${applicationId}.permission.MIPUSH_RECEIVE" />
+
+    <application>
+        <!-- 仅声明自定义组件，其余小米 SDK 组件由 AAR Manifest 自动合并 -->
+        <receiver
+            android:name="com.jiangker.push.xiaomi.XiaomiPushReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.xiaomi.mipush.MESSAGE_ARRIVED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.xiaomi.mipush.ERROR" />
+            </intent-filter>
+        </receiver>
+
+        <meta-data
+            android:name="com.jiangker.push.xiaomi.app_id"
+            android:value="${XIAOMI_APP_ID}" />
+        <meta-data
+            android:name="com.jiangker.push.xiaomi.app_key"
+            android:value="${XIAOMI_APP_KEY}" />
+        <meta-data
+            android:name="channel_id"
+            android:value="${XIAOMI_CHANNEL_ID}" />
+    </application>
+
+</manifest>

@@ -1,0 +1,3 @@
+-keep class com.jiangker.push.honor.HonorPushProvider { <init>(); }
+-keep class com.hihonor.push.** { *; }
+-dontwarn com.hihonor.push.**

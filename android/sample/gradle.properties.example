@@ -1,0 +1,23 @@
+# Push Hub sample app config → manifestPlaceholders
+# Copy to gradle.properties in this directory (gitignored):
+#   cp gradle.properties.example gradle.properties
+
+PUSH_HUB_SERVER=http://10.0.2.2:3000
+PUSH_HUB_APP_ID=your_push_hub_app_id
+
+HUAWEI_APP_ID=your_huawei_app_id
+
+XIAOMI_APP_ID=your_xiaomi_app_id
+XIAOMI_APP_KEY=your_xiaomi_app_key
+XIAOMI_CHANNEL_ID=your_xiaomi_channel_id
+
+OPPO_APP_KEY=your_oppo_app_key
+OPPO_APP_SECRET=your_oppo_app_secret
+
+VIVO_APP_ID=your_vivo_app_id
+VIVO_APP_KEY=your_vivo_app_key
+
+HONOR_APP_ID=your_honor_app_id
+
+MEIZU_APP_ID=your_meizu_app_id
+MEIZU_APP_KEY=your_meizu_app_key

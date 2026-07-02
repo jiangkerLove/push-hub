@@ -1,0 +1,34 @@
+*.iml
+.gradle/
+local.properties
+.DS_Store
+
+# IDE
+.idea/
+
+# Build outputs (all modules)
+build/
+**/build/
+
+# Native / NDK
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Generated binaries
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# fat-aar 构建时从 libs/*.aar 同步生成，勿提交
+vendor-maven/
+
+# 厂商官方 SDK（维护者自行下载到各模块 libs/）
+**/libs/*.aar
+
+# sample 本地推送配置与签名（含密钥，勿提交）
+sample/gradle.properties
+sample/push.properties
+sample/*.jks
+sample/*.keystore

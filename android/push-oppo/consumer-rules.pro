@@ -1,0 +1,4 @@
+-keep class com.jiangker.push.oppo.OppoPushProvider { <init>(); }
+-keep public class * extends android.app.Service
+-keep class com.heytap.msp.** { *;}
+-keep class com.heytap.mcssdk.** { *;}
