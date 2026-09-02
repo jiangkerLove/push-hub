@@ -1,27 +1,5 @@
--- Push Hub PostgreSQL 完整建库脚本（纯 SQL，任意客户端可用）
---
--- 推荐方式：仅创建空库，由服务端启动时通过 sqlx 自动执行 migrations/ 下的迁移。
---
--- 手动初始化（可选，与 sqlx 迁移等效）：
---   1. 连到维护库 postgres，执行下方「建库」一段（库已存在则跳过）
---   2. 切换连接到 push_hub，再执行下方「表结构」全部语句
---
--- psql 示例：
---   psql -U postgres -c "CREATE DATABASE push_hub WITH ENCODING 'UTF8' TEMPLATE template0;"
---   psql -U postgres -d push_hub -f server/sql/schema.sql
---
--- 连接串：
---   DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/push_hub
---
--- 注意：若已用本文件初始化过，服务端首次启动会将 sqlx 迁移标记为已执行（迁移使用 IF NOT EXISTS，可安全重复）。
-
--- ========== 建库（连 postgres 时执行；库已存在可整段注释掉）==========
--- CREATE DATABASE push_hub
---     WITH
---     ENCODING = 'UTF8'
---     TEMPLATE = template0;
-
--- ========== 表结构（必须已连接到 push_hub）==========
+-- Initial Push Hub schema (tables + indexes).
+-- Uses IF NOT EXISTS so manually bootstrapped databases can adopt sqlx migrations safely.
 
 CREATE TABLE IF NOT EXISTS apps (
     id                      TEXT PRIMARY KEY,
@@ -204,31 +182,3 @@ CREATE TABLE IF NOT EXISTS push_outbox_trace (
 );
 
 CREATE INDEX IF NOT EXISTS idx_push_outbox_trace_job_id ON push_outbox_trace (job_id);
-
--- 增量迁移：已有库重复执行 schema.sql 时补齐新字段（索引须在 ALTER 之后）
--- 与 server/migrations/20250301000001_legacy_schema_patches.sql 保持同步
-ALTER TABLE push_job_targets ADD COLUMN IF NOT EXISTS outbox_id TEXT;
-ALTER TABLE push_job_targets ADD COLUMN IF NOT EXISTS vendor_message_id TEXT;
-ALTER TABLE push_outbox_trace ADD COLUMN IF NOT EXISTS target_id TEXT;
-CREATE INDEX IF NOT EXISTS idx_push_job_targets_vendor_message_id
-    ON push_job_targets (vendor_message_id)
-    WHERE vendor_message_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_push_outbox_trace_target_id ON push_outbox_trace (target_id);
-
-ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS is_owner BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS display_time_zone TEXT;
-ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS password_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-UPDATE admin_users
-SET is_owner = TRUE
-WHERE id = (
-    SELECT id FROM admin_users ORDER BY created_at ASC LIMIT 1
-)
-AND NOT EXISTS (SELECT 1 FROM admin_users WHERE is_owner = TRUE);
-
-ALTER TABLE apps ADD COLUMN IF NOT EXISTS push_api_key TEXT;
-UPDATE apps
-SET push_api_key = 'phk_' || replace(gen_random_uuid()::text, '-', '')
-WHERE push_api_key IS NULL OR push_api_key = '';
-
-ALTER TABLE push_outbox ADD COLUMN IF NOT EXISTS template_vars_json JSONB;
-ALTER TABLE push_outbox ADD COLUMN IF NOT EXISTS notify_id INTEGER;

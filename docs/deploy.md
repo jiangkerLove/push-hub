@@ -18,6 +18,13 @@
 
 ```bash
 psql -U postgres -c "CREATE DATABASE push_hub WITH ENCODING 'UTF8' TEMPLATE template0;"
+```
+
+服务端启动时会自动执行 `server/migrations/` 下的 sqlx 迁移，无需再手动跑 `schema.sql`。若已用 `schema.sql` 初始化过，迁移会安全跳过已存在的对象。
+
+可选：手动预建表
+
+```bash
 psql -U postgres -d push_hub -f server/sql/schema.sql
 ```
 
@@ -51,10 +58,9 @@ docker run -d --name push-hub-postgres \
   -v push-hub-pgdata:/var/lib/postgresql/data \
   -p 5432:5432 \
   postgres:16
-
-docker exec -i push-hub-postgres \
-  psql -U push_hub -d push_hub < server/sql/schema.sql
 ```
+
+表结构由 Server 首次启动时自动迁移，无需 `docker exec` 执行 SQL。
 
 同网络内 Server：
 

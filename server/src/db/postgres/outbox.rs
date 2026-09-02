@@ -15,15 +15,6 @@ use crate::models::{
 use crate::AppResult;
 
 pub async fn create_repository(pool: PgPool) -> AppResult<Arc<dyn OutboxRepository>> {
-    // 兼容存量库：厂商降级需要保留模板变量（OPPO 私信参数）。
-    sqlx::query(
-        "ALTER TABLE push_outbox ADD COLUMN IF NOT EXISTS template_vars_json JSONB",
-    )
-    .execute(&pool)
-    .await?;
-    sqlx::query("ALTER TABLE push_outbox ADD COLUMN IF NOT EXISTS notify_id INTEGER")
-        .execute(&pool)
-        .await?;
     Ok(Arc::new(PgOutboxRepository { pool }))
 }
 

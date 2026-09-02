@@ -8,28 +8,6 @@ use crate::models::user::AdminUser;
 use crate::AppResult;
 
 pub async fn create_repository(pool: PgPool) -> AppResult<Arc<dyn AdminUserRepository>> {
-    sqlx::query("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS is_owner BOOLEAN NOT NULL DEFAULT FALSE")
-        .execute(&pool)
-        .await?;
-    sqlx::query("ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS display_time_zone TEXT")
-        .execute(&pool)
-        .await?;
-    sqlx::query(
-        "ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS password_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
-    )
-    .execute(&pool)
-    .await?;
-    sqlx::query(
-        "UPDATE admin_users
-         SET is_owner = TRUE
-         WHERE id = (
-             SELECT id FROM admin_users ORDER BY created_at ASC LIMIT 1
-         )
-         AND NOT EXISTS (SELECT 1 FROM admin_users WHERE is_owner = TRUE)",
-    )
-    .execute(&pool)
-    .await?;
-
     Ok(Arc::new(PgAdminUserRepository { pool }))
 }
 

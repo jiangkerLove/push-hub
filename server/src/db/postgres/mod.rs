@@ -30,6 +30,8 @@ pub async fn connect(url: &str) -> AppResult<(
         .connect(url)
         .await?;
 
+    sqlx::migrate!().run(&pool).await?;
+
     let apps = app::create_repository(pool.clone()).await?;
     let admin_users = admin_user::create_repository(pool.clone()).await?;
     let devices = device::create_repository(pool.clone()).await?;

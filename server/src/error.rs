@@ -17,6 +17,9 @@ pub enum AppError {
     #[error("database error: {0}")]
     Database(#[from] sqlx::Error),
 
+    #[error("database migration error: {0}")]
+    Migration(#[from] sqlx::migrate::MigrateError),
+
     #[error("not found: {0}")]
     NotFound(String),
 
@@ -47,6 +50,7 @@ impl IntoResponse for AppError {
             AppError::Forbidden(_) => StatusCode::FORBIDDEN,
             AppError::Config(_)
             | AppError::Database(_)
+            | AppError::Migration(_)
             | AppError::Push(_)
             | AppError::Http(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
@@ -58,6 +62,10 @@ impl IntoResponse for AppError {
             }
             AppError::Database(err) => {
                 tracing::error!(error = %err, "database error");
+                "internal server error".to_string()
+            }
+            AppError::Migration(err) => {
+                tracing::error!(error = %err, "database migration error");
                 "internal server error".to_string()
             }
             AppError::Http(err) => {
