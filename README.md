@@ -76,7 +76,7 @@ cp sample/gradle.properties.example sample/gradle.properties
 
 ## 部署
 
-生产：`PostgreSQL` + Server + Admin（nginx 反代管理 API）。步骤概要：建库执行 `server/sql/schema.sql` → 启动 Server（`DATABASE_URL` / `JWT_SECRET`）→ 启动 Admin（`API_UPSTREAM`）。
+生产：`PostgreSQL` + Server + Admin（nginx 反代管理 API）。步骤概要：创建空库 `push_hub` → 启动 Server（自动迁移表结构，`DATABASE_URL` / `JWT_SECRET`）→ 启动 Admin（`API_UPSTREAM`）。
 
 完整 Docker / PostgreSQL 步骤见 [docs/deploy.md](docs/deploy.md)。
 

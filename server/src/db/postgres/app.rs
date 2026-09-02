@@ -8,16 +8,6 @@ use crate::models::PushApp;
 use crate::AppResult;
 
 pub async fn create_repository(pool: PgPool) -> AppResult<Arc<dyn AppRepository>> {
-    sqlx::query("ALTER TABLE apps ADD COLUMN IF NOT EXISTS push_api_key TEXT")
-        .execute(&pool)
-        .await?;
-    sqlx::query(
-        "UPDATE apps SET push_api_key = 'phk_' || replace(gen_random_uuid()::text, '-', '')
-         WHERE push_api_key IS NULL OR push_api_key = ''",
-    )
-    .execute(&pool)
-    .await?;
-
     Ok(Arc::new(PgAppRepository { pool }))
 }
 

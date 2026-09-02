@@ -5,9 +5,8 @@ Rust 推送服务端，基于 Axum + PostgreSQL。
 ## 快速开始
 
 ```bash
-# 1. 建库并表结构（需本机 PostgreSQL）
+# 1. 创建空库（需本机 PostgreSQL）
 psql -U postgres -c "CREATE DATABASE push_hub WITH ENCODING 'UTF8' TEMPLATE template0;"
-psql -U postgres -d push_hub -f sql/schema.sql
 
 # 2. 配置连接串
 cp .env.example .env
@@ -16,7 +15,21 @@ cp .env.example .env
 cargo run
 ```
 
-服务默认监听 `http://0.0.0.0:3000`。创建客户端：先建库 `push_hub`，再连接该库执行 `sql/schema.sql`。
+服务启动时会通过 **sqlx** 自动执行 `migrations/` 下的数据库迁移（建表与索引）。
+
+服务默认监听 `http://0.0.0.0:3000`。
+
+## 数据库迁移
+
+迁移文件位于 `migrations/`，按文件名顺序执行，版本记录在 `_sqlx_migrations` 表。
+
+```bash
+# 本地开发可选：安装 sqlx-cli 后手动执行
+cargo install sqlx-cli --no-default-features --features postgres
+sqlx migrate run --database-url "$DATABASE_URL"
+```
+
+新增 schema 变更时，在 `migrations/` 下添加 `YYYYMMDDHHMMSS_description.sql`，勿再在 Repository 中写 `ALTER TABLE`。
 
 ## 开发
 
@@ -35,12 +48,11 @@ API 文档见 [docs/server-api.md](../docs/server-api.md)。
 ### 准备数据库
 
 ```bash
-# 新建库（已有库可跳过）
+# 新建空库（已有库可跳过）
 psql -U postgres -c "CREATE DATABASE push_hub WITH ENCODING 'UTF8' TEMPLATE template0;"
-
-# 初始化表结构
-psql -U postgres -d push_hub -f sql/schema.sql
 ```
+
+表结构由服务端启动时自动迁移。
 
 ### 构建并运行
 
