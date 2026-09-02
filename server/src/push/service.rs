@@ -7,7 +7,7 @@ use crate::models::{
     DeliveryMode, Device, PlatformSendResult, PushFallbackTarget, PushTargets, RenderedNotification,
     SendPushRequest, SendPushResponse, TemplateChannels, FALLBACK_PLATFORM,
     HuaweiCategoryConfig, MeizuMsgTypeConfig, XiaomiChannelConfig, is_vendor_platform,
-    normalize_notify_id,
+    normalize_notify_id, normalize_unread_count,
     resolve_delivery_platform, resolve_message_cache_until, OppoChannelConfig, VivoCategoryConfig,
 };
 use crate::push::template_render::render_template;
@@ -463,6 +463,7 @@ impl PushService {
             channels: notification.channels.clone(),
             delivery_mode: force_delivery_mode.unwrap_or(notification.delivery_mode),
             notify_id: notification.notify_id,
+            unread_count: notification.unread_count,
             vendor_fallback: notification.vendor_fallback.clone(),
             expires_at: notification.expires_at,
             title_variables: notification.title_variables.clone(),
@@ -592,6 +593,7 @@ impl PushService {
 
             let expires_at = resolve_message_cache_until(Some(&template), request)?;
             let notify_id = normalize_notify_id(request.notify_id)?;
+            let unread_count = normalize_unread_count(request.unread_count)?;
 
             channels.validate_oppo_private_template()?;
 
@@ -604,6 +606,7 @@ impl PushService {
                 channels,
                 delivery_mode: request.delivery_mode,
                 notify_id,
+                unread_count,
                 vendor_fallback: None,
                 expires_at,
                 title_variables: request.title_variables.clone(),
@@ -654,6 +657,7 @@ impl PushService {
 
         let expires_at = resolve_message_cache_until(None, request)?;
         let notify_id = normalize_notify_id(request.notify_id)?;
+        let unread_count = normalize_unread_count(request.unread_count)?;
 
         channels.validate_oppo_private_template()?;
 
@@ -666,6 +670,7 @@ impl PushService {
             channels,
             delivery_mode: request.delivery_mode,
             notify_id,
+            unread_count,
             vendor_fallback: None,
             expires_at,
             title_variables: HashMap::new(),
@@ -1007,6 +1012,7 @@ mod tests {
             channels,
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),
             title_variables: HashMap::new(),

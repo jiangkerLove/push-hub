@@ -8,6 +8,8 @@ data class PushMessage(
     val messageId: String? = null,
     /** 通知栏 ID；相同 ID 的新消息覆盖旧通知。 */
     val notifyId: Int? = null,
+    /** 应用未读消息数；用于通知角标展示。 */
+    val unreadCount: Int? = null,
     /** 是否为透传消息（不展示系统通知栏） */
     val passThrough: Boolean = false,
     val clickAction: ClickAction? = null,

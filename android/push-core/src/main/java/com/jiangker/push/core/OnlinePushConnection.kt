@@ -108,6 +108,11 @@ internal object OnlinePushConnection {
                         } else {
                             null
                         },
+                        unreadCount = if (json.has("unread_count") && !json.isNull("unread_count")) {
+                            json.getInt("unread_count")
+                        } else {
+                            null
+                        },
                         clickAction = ClickAction.fromJson(json.optJSONObject("click_action")),
                     )
                     if (message.id.isNotBlank()) {
@@ -135,6 +140,7 @@ internal object OnlinePushConnection {
                     payload = payload,
                     messageId = message.id,
                     notifyId = message.notifyId,
+                    unreadCount = message.unreadCount,
                     passThrough = passThrough,
                     clickAction = message.clickAction,
                 )

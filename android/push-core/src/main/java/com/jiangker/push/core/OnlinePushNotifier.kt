@@ -35,6 +35,9 @@ internal object OnlinePushNotifier {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(contentIntent)
+            .also { builder ->
+                message.unreadCount?.takeIf { it > 0 }?.let { builder.setNumber(it) }
+            }
             .build()
 
         return try {

@@ -84,6 +84,28 @@ X-Push-Hub-Api-Key: phk_xxxxxxxx
 
 `app_id` 须与 API Key 所属应用一致；不传 `app_id` 时使用默认应用，Key 也必须属于该默认应用。
 
+**curl 示例**（可直接复制，将 `phk_xxxxxxxx` 替换为实际 Push API Key）：
+
+```bash
+curl -X POST "https://your-push-hub.example.com/api/v1/push" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer phk_xxxxxxxx" \
+  -d '{
+  "app_id": "push-hub-app-uuid",
+  "title": "订单已发货",
+  "body": "您的订单已发出，请注意查收。",
+  "notify_id": 1001,
+  "unread_count": 5,
+  "payload": {
+    "type": "order_shipped",
+    "order_id": "12345"
+  },
+  "targets": {
+    "device_ids": ["device-uuid-1"]
+  }
+}'
+```
+
 **请求体**（按模板类型选择字段；与管理端「发送推送」一致）：
 
 **私信拼接模板**（模板预设标题/正文，含 `{{变量}}`）：
@@ -105,6 +127,7 @@ X-Push-Hub-Api-Key: phk_xxxxxxxx
   },
   "delivery_mode": "notification",
   "notify_id": 1001,
+  "unread_count": 5,
   "click_action": {
     "type": "open_page",
     "activity": "com.example.app.OrderDetailActivity",
@@ -156,6 +179,7 @@ X-Push-Hub-Api-Key: phk_xxxxxxxx
 | `payload` | object | 可选 | 业务自定义 JSON，默认 `{}`，透传给客户端 |
 | `delivery_mode` | string · `"notification"` \| `"data"` | 可选 | 投递模式，默认 `notification` |
 | `notify_id` | integer | 可选 | 通知栏 ID（0~2147483647，JSON 整数非字符串）；相同 ID 覆盖旧通知 |
+| `unread_count` | integer | 可选 | 应用未读消息数（0~2147483647）；用于通知角标/未读数展示 |
 | `click_action` | object | 可选 | 点击行为：`type`（string 枚举）、`activity`/`url`（string）、`params`（object） |
 | `cache_until` | string · ISO 8601 | 可选 | 在线消息缓存截止时间，如 `2026-07-13T08:00:00Z` |
 | `targets` | object | 必填 | 推送目标容器 |
@@ -215,11 +239,13 @@ WebSocket 长连接，用于实时接收在线推送。SDK 内部使用。
   "payload": {},
   "delivery_mode": "notification",
   "notify_id": 1001,
+  "unread_count": 5,
   "created_at": "2026-01-01T00:00:00Z"
 }
 ```
 
 `notify_id` 可选；客户端展示系统通知时优先使用该 ID，相同 ID 的新消息会覆盖旧通知。
+`unread_count` 可选；客户端展示系统通知时用于角标/未读数（如 `NotificationCompat.setNumber`）。
 
 **客户端 → 服务端消息：**
 

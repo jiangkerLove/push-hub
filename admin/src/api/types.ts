@@ -352,6 +352,8 @@ export interface SendPushRequest {
   cache_until?: string
   /** 通知栏 ID（0~2147483647）；不填则不传给服务端 */
   notify_id?: number
+  /** 应用未读消息数（0~2147483647）；用于通知角标展示 */
+  unread_count?: number
   targets: {
     device_ids: string[]
   }

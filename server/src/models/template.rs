@@ -200,11 +200,20 @@ pub const DEFAULT_MESSAGE_CACHE_DAYS: i64 = 7;
 
 /// 发送请求 notify_id 合法范围：0~2147483647。
 pub fn normalize_notify_id(value: Option<i32>) -> AppResult<Option<i32>> {
+    normalize_non_negative_i32(value, "notify_id")
+}
+
+/// 发送请求 unread_count 合法范围：0~2147483647。
+pub fn normalize_unread_count(value: Option<i32>) -> AppResult<Option<i32>> {
+    normalize_non_negative_i32(value, "unread_count")
+}
+
+fn normalize_non_negative_i32(value: Option<i32>, field: &str) -> AppResult<Option<i32>> {
     match value {
         None => Ok(None),
         Some(id) if (0..=2_147_483_647).contains(&id) => Ok(Some(id)),
         Some(id) => Err(AppError::BadRequest(format!(
-            "notify_id must be an integer from 0 to 2147483647, got {id}"
+            "{field} must be an integer from 0 to 2147483647, got {id}"
         ))),
     }
 }
