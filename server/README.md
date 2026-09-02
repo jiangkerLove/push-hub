@@ -15,13 +15,9 @@ cp .env.example .env
 cargo run
 ```
 
-服务启动时会通过 **sqlx** 自动执行 `migrations/` 下的数据库迁移（建表、索引、增量升级），无需手动跑 `schema.sql`。
+服务启动时会通过 **sqlx** 自动执行 `migrations/` 下的数据库迁移（建表与索引）。
 
 服务默认监听 `http://0.0.0.0:3000`。
-
-### 手动初始化（可选）
-
-若希望用 psql 预先建表，可执行 `sql/schema.sql`（与迁移等效，可安全重复执行）。服务端仍会运行 sqlx 迁移并跳过已存在的对象。
 
 ## 数据库迁移
 
@@ -56,7 +52,7 @@ API 文档见 [docs/server-api.md](../docs/server-api.md)。
 psql -U postgres -c "CREATE DATABASE push_hub WITH ENCODING 'UTF8' TEMPLATE template0;"
 ```
 
-表结构由服务端启动时自动迁移，无需再执行 `schema.sql`。
+表结构由服务端启动时自动迁移。
 
 ### 构建并运行
 

@@ -20,13 +20,7 @@
 psql -U postgres -c "CREATE DATABASE push_hub WITH ENCODING 'UTF8' TEMPLATE template0;"
 ```
 
-服务端启动时会自动执行 `server/migrations/` 下的 sqlx 迁移，无需再手动跑 `schema.sql`。若已用 `schema.sql` 初始化过，迁移会安全跳过已存在的对象。
-
-可选：手动预建表
-
-```bash
-psql -U postgres -d push_hub -f server/sql/schema.sql
-```
+服务端启动时会自动执行 `server/migrations/` 下的 sqlx 迁移。
 
 连接串示例：
 

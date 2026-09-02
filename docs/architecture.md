@@ -130,7 +130,7 @@ pub trait PushProvider: Send + Sync {
 
 ## 数据库 Schema（PostgreSQL）
 
-完整建库脚本见 `server/sql/schema.sql`（可选手动执行）；**推荐**仅创建空库，由服务端启动时通过 `server/migrations/` 下的 sqlx 迁移自动建表与升级。
+仅创建空库 `push_hub`，由服务端启动时通过 `server/migrations/` 下的 sqlx 迁移自动建表。
 
 | 表 | 用途 |
 |----|------|
