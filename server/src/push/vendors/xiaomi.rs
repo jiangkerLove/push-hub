@@ -148,6 +148,9 @@ impl PushProvider for XiaomiPushProvider {
             if let Some(notify_id) = notification.notify_id {
                 form.push(("notify_id", notify_id.to_string()));
             }
+            if let Some(unread_count) = notification.unread_count {
+                form.push(("extra.badge", unread_count.to_string()));
+            }
             apply_click_action_extras(
                 &mut form,
                 &notification.click_action,

@@ -233,11 +233,11 @@ function onCopy(text?: string | null) {
                     <code>POST /api/v1/push</code>
                     （非管理端
                     <code>/api/v1/admin/</code>
-                    ）。开发环境下若 Vite 已代理 <code>/api</code>，基址可与管理端同源。
+                    ）。可直接复制下方 curl 命令调试；开发环境下若 Vite 已代理 <code>/api</code>，基址可与管理端同源。
                   </p>
                 </div>
               </header>
-              <CodeSnippet title="curl" lang="Shell" :code="backendCurlSnippet" @copy="onCopy" />
+              <CodeSnippet title="curl（可直接复制）" lang="Shell" :code="backendCurlSnippet" @copy="onCopy" />
               <p class="integrate-note">{{ backendJsonSnippetHint }}</p>
               <CodeSnippet title="请求体" lang="JSON" :code="backendJsonSnippet" @copy="onCopy" />
             </article>

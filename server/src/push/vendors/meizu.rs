@@ -283,6 +283,7 @@ mod tests {
             package_name: "com.example".into(),
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             channels: TemplateChannels {
                 meizu: Some(MeizuMsgTypeConfig {
                     msg_type: "PRIVATE".into(),

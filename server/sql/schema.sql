@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS push_outbox (
     click_action_json   JSONB,
     template_vars_json  JSONB,
     notify_id           INTEGER,
+    unread_count        INTEGER,
     fallback_platform   TEXT,
     fallback_token      TEXT,
     fallback_sent_at    TIMESTAMPTZ,

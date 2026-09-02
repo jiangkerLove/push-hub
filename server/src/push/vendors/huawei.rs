@@ -145,6 +145,7 @@ impl PushProvider for HuaweiPushProvider {
             &notification.click_action,
             &package_name,
             notification.notify_id,
+            notification.unread_count,
         );
 
         let payload = if notification.payload.is_null() {
@@ -258,6 +259,7 @@ fn build_android_notification(
     action: &ClickAction,
     package_name: &str,
     notify_id: Option<i32>,
+    unread_count: Option<i32>,
 ) -> Value {
     let mut android = json!({
         "title": notification.title,
@@ -273,7 +275,22 @@ fn build_android_notification(
     if let Some(id) = notify_id {
         android["notify_id"] = json!(id);
     }
+    if let Some(count) = unread_count {
+        if let Some(activity) = badge_activity_class(action) {
+            android["badge"] = json!({
+                "set_num": count,
+                "class": activity,
+            });
+        }
+    }
     android
+}
+
+fn badge_activity_class(action: &ClickAction) -> Option<String> {
+    if matches!(action.r#type, ClickActionType::OpenPage) {
+        return action.activity_class().ok().map(|s| s.to_string());
+    }
+    None
 }
 
 fn build_click_action(action: &ClickAction, package_name: &str) -> Value {
@@ -490,8 +507,27 @@ mod tests {
             },
             "com.example.app",
             Some(1001),
+            None,
         );
         assert_eq!(android["notify_id"], 1001);
+    }
+
+    #[test]
+    fn android_notification_includes_badge_when_unread_count_and_activity_set() {
+        let notification = sample_notification("Hello", "World");
+        let android = build_android_notification(
+            &notification,
+            &ClickAction {
+                r#type: ClickActionType::OpenPage,
+                activity: Some("com.example.app.MainActivity".into()),
+                ..Default::default()
+            },
+            "com.example.app",
+            None,
+            Some(5),
+        );
+        assert_eq!(android["badge"]["set_num"], 5);
+        assert_eq!(android["badge"]["class"], "com.example.app.MainActivity");
     }
 
     fn sample_notification(title: &str, body: &str) -> RenderedNotification {
@@ -504,6 +540,7 @@ mod tests {
             channels: TemplateChannels::default(),
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),
             title_variables: HashMap::new(),

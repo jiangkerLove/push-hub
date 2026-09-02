@@ -14,6 +14,7 @@ internal data class OnlineOutboxMessage(
     val payload: String,
     val deliveryMode: String,
     val notifyId: Int? = null,
+    val unreadCount: Int? = null,
     val clickAction: ClickAction? = null,
 )
 
@@ -96,6 +97,11 @@ internal object OnlinePushClient {
                         deliveryMode = item.optString("delivery_mode", "notification"),
                         notifyId = if (item.has("notify_id") && !item.isNull("notify_id")) {
                             item.getInt("notify_id")
+                        } else {
+                            null
+                        },
+                        unreadCount = if (item.has("unread_count") && !item.isNull("unread_count")) {
+                            item.getInt("unread_count")
                         } else {
                             null
                         },
