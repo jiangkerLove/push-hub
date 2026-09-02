@@ -195,6 +195,14 @@
             />
             <p class="ph-field-hint">填写后相同 ID 的新消息会覆盖旧通知；不填则不传给服务端</p>
           </el-form-item>
+          <el-form-item label="未读数">
+            <el-input
+              v-model="pushForm.unread_count"
+              placeholder="可选，如 5"
+              clearable
+            />
+            <p class="ph-field-hint">应用未读消息数，用于通知角标展示；不填则不传给服务端</p>
+          </el-form-item>
           <el-form-item label="缓存截止">
             <div class="ph-cache-until-field">
               <el-checkbox v-model="pushForm.overrideCacheUntil">指定截止时间</el-checkbox>
@@ -1405,6 +1413,7 @@ const pushForm = reactive({
   click_params: [] as ClickParamRow[],
   url: '',
   notify_id: '',
+  unread_count: '',
   overrideCacheUntil: false,
   cacheUntil: defaultCacheUntil(7) as Date,
 })
@@ -2412,6 +2421,16 @@ async function onSendPush() {
     }
     notifyId = parsed
   }
+  const unreadCountRaw = pushForm.unread_count.trim()
+  let unreadCount: number | undefined
+  if (unreadCountRaw) {
+    const parsed = Number(unreadCountRaw)
+    if (!Number.isInteger(parsed) || parsed < 0 || parsed > 2147483647) {
+      ElMessage.warning('未读数须为 0~2147483647 的整数')
+      return
+    }
+    unreadCount = parsed
+  }
   let clickParams: Record<string, unknown> | undefined
   if (pushForm.click_type === 'open_page') {
     const built = buildClickParams()
@@ -2453,6 +2472,9 @@ async function onSendPush() {
     )
     if (notifyId !== undefined) {
       requestBody.notify_id = notifyId
+    }
+    if (unreadCount !== undefined) {
+      requestBody.unread_count = unreadCount
     }
     pushResult.value = await sendPush(appId.value, requestBody)
     await loadJobs()

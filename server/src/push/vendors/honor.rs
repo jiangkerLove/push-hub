@@ -204,6 +204,7 @@ impl PushProvider for HonorPushProvider {
             &package_name,
             &category,
             notification.notify_id,
+            notification.unread_count,
             &when,
         );
 
@@ -297,6 +298,7 @@ fn build_android_notification(
     package_name: &str,
     importance: &str,
     notify_id: Option<i32>,
+    unread_count: Option<i32>,
     when: &str,
 ) -> Value {
     let mut notification = json!({
@@ -310,7 +312,22 @@ fn build_android_notification(
     if let Some(id) = notify_id {
         notification["notifyId"] = json!(id);
     }
+    if let Some(count) = unread_count {
+        if let Some(activity) = badge_activity_class(action) {
+            notification["badge"] = json!({
+                "setNum": count,
+                "class": activity,
+            });
+        }
+    }
     notification
+}
+
+fn badge_activity_class(action: &ClickAction) -> Option<String> {
+    if matches!(action.r#type, ClickActionType::OpenPage) {
+        return action.activity_class().ok().map(|s| s.to_string());
+    }
+    None
 }
 
 /// 荣耀 `android.notification.when`：UTC 时间戳，纳秒精度（官方示例 `2014-10-02T15:01:23.045123456Z`）。
@@ -521,6 +538,7 @@ mod tests {
             "com.example.app",
             "NORMAL",
             Some(12345),
+            None,
             when,
         );
         let notification = RenderedNotification {
@@ -534,6 +552,7 @@ mod tests {
             },
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             channels: TemplateChannels::default(),
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),

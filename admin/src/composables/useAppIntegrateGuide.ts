@@ -156,6 +156,15 @@ export const BACKEND_FIELDS = [
       + '相同 notify_id 的新消息会覆盖旧通知；不传则不下发该字段。',
   },
   {
+    name: 'unread_count',
+    type: 'integer',
+    required: '可选',
+    requiredLevel: 'optional',
+    desc:
+      '应用未读消息数，JSON 整数（非字符串），范围 0~2147483647，如 5。'
+      + '用于通知角标/未读数展示；在线推送会在通知栏显示角标，部分厂商通道会同步桌面角标。',
+  },
+  {
     name: 'cache_until',
     type: 'string · ISO 8601',
     required: '可选',
@@ -467,6 +476,7 @@ X-Push-Hub-Api-Key: ${pushApiKey.value || 'your_push_api_key'}  # 二选一`,
       },
       delivery_mode: 'notification',
       notify_id: 1001,
+      unread_count: 5,
       click_action: {
         type: 'open_app',
       },

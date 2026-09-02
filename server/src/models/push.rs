@@ -41,6 +41,9 @@ pub struct SendPushRequest {
     /// 通知栏 notify_id / notifyId（0~2147483647）；仅发送请求携带，相同 ID 的新消息覆盖旧通知。
     #[serde(default)]
     pub notify_id: Option<i32>,
+    /// 应用未读消息数（0~2147483647）；用于通知角标/未读数展示，不传则不下发。
+    #[serde(default)]
+    pub unread_count: Option<i32>,
     /// 覆盖模板默认缓存天数对应的截止时间（ISO 8601）
     #[serde(default)]
     pub cache_until: Option<DateTime<Utc>>,
@@ -98,6 +101,9 @@ pub struct OutboxMessage {
     /// 发送请求中的 notify_id；在线通知栏相同 ID 会覆盖旧通知。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub notify_id: Option<i32>,
+    /// 发送请求中的 unread_count；用于通知角标/未读数展示。
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unread_count: Option<i32>,
     pub created_at: String,
 }
 
@@ -183,6 +189,7 @@ pub struct OutboxFallbackJob {
     pub title_variables: HashMap<String, String>,
     pub body_variables: HashMap<String, String>,
     pub notify_id: Option<i32>,
+    pub unread_count: Option<i32>,
 }
 
 #[derive(Debug, Clone)]
@@ -202,6 +209,8 @@ pub struct RenderedNotification {
     pub delivery_mode: DeliveryMode,
     /// 发送请求中的 notify_id；未设置则不传给厂商。
     pub notify_id: Option<i32>,
+    /// 发送请求中的 unread_count；未设置则不传给厂商/客户端。
+    pub unread_count: Option<i32>,
     /// 在线推送未送达时，降级到厂商离线推送
     pub vendor_fallback: Option<PushFallbackTarget>,
     /// 在线 outbox 消息缓存截止时间

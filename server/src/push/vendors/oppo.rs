@@ -295,6 +295,10 @@ fn build_notification_body(
     if let Some(notify_id) = notification.notify_id {
         body["notifyId"] = json!(notify_id);
     }
+    if let Some(unread_count) = notification.unread_count {
+        body["badgeOperationType"] = json!(2);
+        body["badgeMessageCount"] = json!(unread_count);
+    }
     Ok(body)
 }
 
@@ -440,6 +444,7 @@ mod tests {
             },
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),
             title_variables,
@@ -485,6 +490,7 @@ mod tests {
             },
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),
             title_variables: HashMap::new(),
@@ -522,6 +528,7 @@ mod tests {
             },
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),
             title_variables: HashMap::new(),
@@ -556,6 +563,7 @@ mod tests {
             },
             delivery_mode: DeliveryMode::Notification,
             notify_id: None,
+            unread_count: None,
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),
             title_variables: HashMap::new(),
@@ -579,6 +587,7 @@ mod tests {
             channels: TemplateChannels::default(),
             delivery_mode: DeliveryMode::Notification,
             notify_id: Some(42),
+            unread_count: None,
             vendor_fallback: None,
             expires_at: chrono::Utc::now(),
             title_variables: HashMap::new(),

@@ -24,6 +24,9 @@ pub async fn create_repository(pool: PgPool) -> AppResult<Arc<dyn OutboxReposito
     sqlx::query("ALTER TABLE push_outbox ADD COLUMN IF NOT EXISTS notify_id INTEGER")
         .execute(&pool)
         .await?;
+    sqlx::query("ALTER TABLE push_outbox ADD COLUMN IF NOT EXISTS unread_count INTEGER")
+        .execute(&pool)
+        .await?;
     Ok(Arc::new(PgOutboxRepository { pool }))
 }
 
@@ -68,9 +71,9 @@ impl OutboxRepository for PgOutboxRepository {
                 INSERT INTO push_outbox (
                     id, batch_id, push_token, package_name, title, body, payload,
                     delivery_mode, channels_json, click_action_json, template_vars_json,
-                    notify_id, fallback_platform, fallback_token, expires_at, created_at
+                    notify_id, unread_count, fallback_platform, fallback_token, expires_at, created_at
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
                 "#,
             )
             .bind(&row_id)
@@ -88,6 +91,7 @@ impl OutboxRepository for PgOutboxRepository {
                 body: notification.body_variables.clone(),
             }))
             .bind(notification.notify_id)
+            .bind(notification.unread_count)
             .bind(fallback_platform)
             .bind(fallback_token)
             .bind(notification.expires_at)
@@ -105,6 +109,7 @@ impl OutboxRepository for PgOutboxRepository {
                     delivery_mode: notification.delivery_mode,
                     click_action: notification.click_action.clone(),
                     notify_id: notification.notify_id,
+                    unread_count: notification.unread_count,
                     created_at: format_ts(created_at),
                 },
             });
@@ -121,7 +126,7 @@ impl OutboxRepository for PgOutboxRepository {
         let limit = limit.clamp(1, 100);
         let rows = sqlx::query_as::<_, OutboxRow>(
             r#"
-            SELECT id, title, body, payload, delivery_mode, click_action_json, notify_id, created_at
+            SELECT id, title, body, payload, delivery_mode, click_action_json, notify_id, unread_count, created_at
             FROM push_outbox
             WHERE push_token = $1
               AND delivered_at IS NULL
@@ -168,7 +173,7 @@ impl OutboxRepository for PgOutboxRepository {
             r#"
             SELECT id, package_name, title, body, payload, delivery_mode,
                    fallback_platform, fallback_token, channels_json, click_action_json,
-                   template_vars_json, notify_id
+                   template_vars_json, notify_id, unread_count
             FROM push_outbox
             WHERE delivered_at IS NULL
               AND fallback_sent_at IS NULL
@@ -210,7 +215,7 @@ impl OutboxRepository for PgOutboxRepository {
             r#"
             SELECT id, package_name, title, body, payload, delivery_mode,
                    fallback_platform, fallback_token, channels_json, click_action_json,
-                   template_vars_json, notify_id
+                   template_vars_json, notify_id, unread_count
             FROM push_outbox
             WHERE id IN ({placeholders})
               AND fallback_platform IS NOT NULL
@@ -267,6 +272,7 @@ struct OutboxRow {
     delivery_mode: String,
     click_action_json: Option<Json<ClickAction>>,
     notify_id: Option<i32>,
+    unread_count: Option<i32>,
     created_at: DateTime<Utc>,
 }
 
@@ -286,6 +292,7 @@ impl OutboxRow {
             delivery_mode,
             click_action,
             notify_id: self.notify_id,
+            unread_count: self.unread_count,
             created_at: format_ts(self.created_at),
         })
     }
@@ -305,6 +312,7 @@ struct OutboxFallbackRow {
     click_action_json: Option<Json<ClickAction>>,
     template_vars_json: Option<Json<TemplateVarsJson>>,
     notify_id: Option<i32>,
+    unread_count: Option<i32>,
 }
 
 impl OutboxFallbackRow {
@@ -331,6 +339,7 @@ impl OutboxFallbackRow {
             title_variables: vars.title,
             body_variables: vars.body,
             notify_id: self.notify_id,
+            unread_count: self.unread_count,
         })
     }
 }

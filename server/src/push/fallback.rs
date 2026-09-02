@@ -100,6 +100,7 @@ pub async fn send_vendor_fallback(
         channels: job.channels.clone(),
         delivery_mode: DeliveryMode::Notification,
         notify_id: job.notify_id,
+        unread_count: job.unread_count,
         vendor_fallback: None,
         expires_at: chrono::Utc::now(),
         title_variables: job.title_variables.clone(),
