@@ -182,6 +182,9 @@ CREATE TABLE IF NOT EXISTS push_job_targets (
 );
 
 CREATE INDEX IF NOT EXISTS idx_push_job_targets_job_id ON push_job_targets (job_id);
+CREATE INDEX IF NOT EXISTS idx_push_job_targets_vendor_message_id
+    ON push_job_targets (vendor_message_id)
+    WHERE vendor_message_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS push_job_events (
     id              TEXT PRIMARY KEY,
